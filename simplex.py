@@ -66,19 +66,22 @@ class Simplex2D(object):
 		return self.tableau[cost_index].index(pivot)
 
 	# Look for the minimum limit for the variable
+	# pivot: pivot index
 	def getConstraintLimit(self,pivot):
 		b_index = self.var_count + self.constraints_count
 
 		limit = float("inf")
 		line_index = -1
 		for i in range(0,self.constraints_count):
-			if self.tableau[i][b_index]/self.tableau[i][pivot] < limit:
+			if self.tableau[i][b_index]/self.tableau[i][pivot] < limit and self.tableau[i][pivot] > 0 :
 				limit = self.tableau[i][b_index]/self.tableau[i][pivot]
 				line_index = i
 		print 'Limit %f in %d' %(limit,line_index)
 		return line_index
 
 	# Scaling matrix in order to obtain 0 in position 'pivot'
+	# i: constraint index
+	# pivot: pivot index
 	def scalingMatrix(self,i,pivot):
 		for j in range(0,self.constraints_count+1):
 			if i != j:
@@ -92,6 +95,8 @@ class Simplex2D(object):
 	def iteration(self):
 		pivot_index  = self.getPivot()
 		constaint_index = self.getConstraintLimit(pivot_index)
+		if constaint_index == -1:
+			return
 		pivot_value = self.tableau[constaint_index][pivot_index]
 
 		print 'Pivot Index',pivot_index
@@ -124,7 +129,7 @@ if __name__ == '__main__':
 	simplex.initTableau()
 	print simplex.tableau
 	i = 1
-	while i < 3:
+	while simplex.canContinue():
 		print '###### Iteration',i
 		simplex.iteration()
 		print simplex.tableau
