@@ -16,7 +16,7 @@ class Simplex(object):
 		print 'Simplex Phase 1'
 
 		res = True
-		if self.checkFeasiability() == False:
+		if self.checkFeasibility() == False:
 
 			self.addArtificialVariables()
 			self.addNewCostFunction()
@@ -37,7 +37,7 @@ class Simplex(object):
 		else:
 
 			if self.tableau[self.tableau.cost_index][self.tableau.b_index] > 0:
-				print 'Sum of artificial variables is greater than 0, then the problem is infeasible'
+				print 'Sum of artificial variables is greater than 0, then the problem is not feasible'
 				res = False
 			else:
 				print 'Phase 1 has found feasible tableau'
@@ -128,7 +128,7 @@ class Simplex(object):
 
 	# def phase1(self):
 
-	def checkFeasiability(self):
+	def checkFeasibility(self):
 		n = self.requeredArtificalVariables()
 		if n == 0:
 			return True
@@ -270,7 +270,7 @@ if __name__ == '__main__':
 	print simplex.tableau.columns
 	i = 1
 	print simplex.tableau.artificial_variable
-	print simplex.checkFeasiability()
+	print simplex.checkFeasibility()
 	simplex.execute()
 	# while simplex.canContinue():
 	# 	print '###### Iteration',i
