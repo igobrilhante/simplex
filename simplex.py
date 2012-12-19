@@ -316,6 +316,28 @@ def test3():
 	print 'Solution: '+str(simplex.solution)
 	print simplex.tableau
 
+def test4():
+	print 'Test 3'
+	r1 =[4,1,'<',21]
+	r2 = [2,3,'>',13]
+	r3 = [-1,1,'=',1]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-6,1]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
 if __name__ == '__main__':
 
 	print 'Simplex Method'
@@ -324,11 +346,13 @@ if __name__ == '__main__':
 
 	print '\n\n\n'
 
-	test2()
+	# test2()
 
 	print '\n\n\n'
 
-	test3()
+	# test3()
+
+	test4()
 
 
 
