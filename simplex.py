@@ -31,21 +31,23 @@ class Simplex(object):
 				count += 1
 				print simplex.tableau
 
-		if len(set(self.tableau.basis) & set(self.tableau.artificial_variable)) > 0:
-			print 'There still exist artifical variables'
-			res =  False
-		else:
-
-			if self.tableau[self.tableau.cost_index][self.tableau.b_index] > 0:
-				print 'Sum of artificial variables is greater than 0, then the problem is not feasible'
-				res = False
+			if len(set(self.tableau.basis) & set(self.tableau.artificial_variable)) > 0:
+				print 'There still exist artifical variables'
+				res =  False
 			else:
-				print 'Phase 1 has found feasible tableau'
-				self.tableau.removeRow(self.tableau.cost_index)
-				self.tableau.cost_index = self.tableau.lines -1
 
-				for i in self.tableau.artificial_variable:
-					self.tableau.removeColumn(self.tableau.columns-2)
+				if self.tableau[self.tableau.cost_index][self.tableau.b_index] > 0:
+					print 'Sum of artificial variables is greater than 0, then the problem is not feasible'
+					res = False
+				else:
+					print 'Phase 1 has found feasible tableau'
+					self.tableau.removeRow(self.tableau.cost_index)
+					self.tableau.cost_index = self.tableau.lines -1
+
+					for i in self.tableau.artificial_variable:
+						self.tableau.removeColumn(self.tableau.columns-2)
+
+					self.tableau.b_index = self.tableau.columns-1
 
 		print 'Simplex Phase 1 End'
 		return res
@@ -62,8 +64,14 @@ class Simplex(object):
 		print 'Simplex Phase 2 End'
 
 	def execute(self):
-		self.phase1()
-		# self.phase2()
+		self.solution = None
+		
+		r = self.phase1()
+		
+		if r == True:
+			self.phase2()
+
+			self.solution = self.tableau[self.tableau.cost_index][self.tableau.b_index]
 
 	# Add artificial variables into Tableau
 	def requeredArtificalVariables(self):
@@ -129,7 +137,8 @@ class Simplex(object):
 	# def phase1(self):
 
 	def checkFeasibility(self):
-		n = self.requeredArtificalVariables()
+		n,c = self.requeredArtificalVariables()
+		print n
 		if n == 0:
 			return True
 		return False
@@ -242,10 +251,8 @@ class Simplex(object):
 			print 'Solution is unbounded'
 			return False
 
-
-if __name__ == '__main__':
-
-	print 'Simplex Method'
+def test1():
+	print 'Test 1'
 	r1 = [2,1,-2,'<',8]
 	r2 = [4,-1,2,'>',2]
 	r3 = [2,3,-1,'>',4]
@@ -261,24 +268,68 @@ if __name__ == '__main__':
 
 	simplex = Simplex(tableau)
 
-	print simplex.tableau
-	print simplex.tableau.basis
-	print simplex.tableau.var_count
-	print simplex.tableau.constraints_count
-	print simplex.tableau.cost_index
-	print simplex.tableau.b_index
-	print simplex.tableau.columns
-	i = 1
-	print simplex.tableau.artificial_variable
-	print simplex.checkFeasibility()
 	simplex.execute()
-	# while simplex.canContinue():
-	# 	print '###### Iteration',i
-	# 	b = simplex.iteration()
-	# 	print simplex.tableau
-	# 	if b == False:
-	# 		break
-	# 	i += 1
+
+	print 'Solution: '+str(simplex.solution)
+
+def test2():
+	print 'Test 2'
+	r1 =[1,2,4,-1,'<',6]
+	r2 = [2,3,-1,1,'<',12]
+	r3 = [1,0,1,1,'<',4]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-2,-1,-5,3]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
+def test3():
+	print 'Test 3'
+	r1 =[1,2,'<',6]
+	r2 = [-2,1,'<',4]
+	r3 = [5,3,'<',15]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-5,-4]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
+if __name__ == '__main__':
+
+	print 'Simplex Method'
+	
+	# test1()
+
+	print '\n\n\n'
+
+	test2()
+
+	print '\n\n\n'
+
+	test3()
+
 
 
 
