@@ -5,13 +5,16 @@
 
 from tableau import Tableau
 
+
+# Class to represent Simplex Two Phases method
+
 class Simplex(object):
 	"""docstring for Simplex2D"""
 	def __init__(self, tableau ):
 		super(Simplex, self).__init__()
 		self.tableau = tableau
 
-
+	# First Phase
 	def phase1(self):
 		print 'Simplex Phase 1'
 
@@ -26,24 +29,30 @@ class Simplex(object):
 			simplex = Simplex(self.tableau)
 			count = 1
 			while simplex.canContinue():
+				print ''
 				print 'Iteration '+str(count)
+				print ''
 				simplex.iteration()
 				count += 1
 				print simplex.tableau
-
+			# In this case, the Phase 1 has finished with artificial variables
 			if len(set(self.tableau.basis) & set(self.tableau.artificial_variable)) > 0:
 				print 'There still exist artifical variables'
 				res =  False
 			else:
-
+				# The sum of the infeasibilities is greater than 0, what characterizes an unfeasible solution
 				if self.tableau[self.tableau.cost_index][self.tableau.b_index] > 0:
 					print 'Sum of artificial variables is greater than 0, then the problem is not feasible'
+					self.solution = 'infeasible'
 					res = False
+				# Everything has happened fine. A feasible tableau has been found to proceed to Phase 2
 				else:
 					print 'Phase 1 has found feasible tableau'
+					# Remove the artificial cost function
 					self.tableau.removeRow(self.tableau.cost_index)
 					self.tableau.cost_index = self.tableau.lines -1
 
+					# Remove the artifical variables
 					for i in self.tableau.artificial_variable:
 						self.tableau.removeColumn(self.tableau.columns-2)
 
@@ -52,17 +61,30 @@ class Simplex(object):
 		print 'Simplex Phase 1 End'
 		return res
 
+	# Second Phase
+	# This phase occurs only if the method has found a feasible solution in Phase 1
 	def phase2(self):
+		print ''
 		print 'Simplex Phase 2'
 		i = 1
+		print '### Initial Tableau Phase 2'
+		print self.tableau
+		b = True
 		while self.canContinue():
+			print ''
 			print '###### Iteration',i
+			print ''
 			b = self.iteration()
+			print self.tableau
 			if b == False:
 				break
 			i += 1
+		if b == True:
+			self.solution = self.tableau[self.tableau.cost_index][self.tableau.b_index]
+		print ''
 		print 'Simplex Phase 2 End'
 
+	# Exceute the method
 	def execute(self):
 		self.solution = None
 		
@@ -71,7 +93,7 @@ class Simplex(object):
 		if r == True:
 			self.phase2()
 
-			self.solution = self.tableau[self.tableau.cost_index][self.tableau.b_index]
+			
 
 	# Add artificial variables into Tableau
 	def requeredArtificalVariables(self):
@@ -87,6 +109,7 @@ class Simplex(object):
 
 		return n_of_variables,c
 
+	# Add artificial variable during the Phase 1	
 	def addArtificialVariables(self):
 		n_of_variables,c = self.requeredArtificalVariables()
 
@@ -109,6 +132,7 @@ class Simplex(object):
 
 		self.tableau.b_index = self.tableau.columns - 1
 
+	# Add an artificial cost function W during the Phase 1
 	def addNewCostFunction(self):
 		
 
@@ -126,6 +150,7 @@ class Simplex(object):
 
 			self.tableau.cost_index = self.tableau.lines - 1
 
+	# Check if there still exist a direction of decreasing
 	def canContinue(self):
 		cost_index = self.tableau.cost_index
 		for i in range (0,self.tableau.columns):
@@ -193,11 +218,11 @@ class Simplex(object):
 		line_index = -1
 		for i in range(0,self.tableau.constraints_count):
 			if self.tableau[i][pivot] > 0:
-				print 'l : '+str(self.tableau[i][b_index]/self.tableau[i][pivot])
+				# print 'l : '+str(self.tableau[i][b_index]/self.tableau[i][pivot])
 				if self.tableau[i][b_index]/self.tableau[i][pivot] < limit:
 					limit = self.tableau[i][b_index]/self.tableau[i][pivot]
 					line_index = i
-		print 'Limit %f in %d' %(limit,line_index)
+		# print 'Limit %f in %d' %(limit,line_index)
 		return line_index
 
 	# Scaling matrix in order to obtain 0 in position 'pivot'
@@ -216,9 +241,9 @@ class Simplex(object):
 
 		pivot_value = self.tableau[constraint_index][pivot_index]
 
-		print 'Pivot Index',pivot_index
-		print 'Pivot Value',pivot_value
-		print 'Constraint Index',constraint_index
+		# print 'Pivot Index',pivot_index
+		# print 'Pivot Value',pivot_value
+		# print 'Constraint Index',constraint_index
 
 		for i in range(0,self.tableau.columns):
 			self.tableau[constraint_index][i] = self.tableau[constraint_index][i] / pivot_value
@@ -232,6 +257,7 @@ class Simplex(object):
 
 		if(self.isDegenerative(pivot_index)):
 			print 'Problem is degenerative and it needs to use another method'
+			self.solution = 'degenerative'
 			return False
 
 		# Check if the solution if bounded
@@ -249,6 +275,7 @@ class Simplex(object):
 			return True
 		else:
 			print 'Solution is unbounded'
+			self.solution = 'unbounded'
 			return False
 
 def test1():
@@ -338,6 +365,117 @@ def test4():
 	print 'Solution: '+str(simplex.solution)
 	print simplex.tableau
 
+# problema patologico
+def test5():
+	print 'Test 3'
+	r1 =[1,0,0,'<',1]
+	r2 = [20,1,0,'<',100]
+	r3 = [200,20,1,'<',10000]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-100,-10,-1]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
+def test6():
+	print 'Test 6'
+	r1 =[1,2,4,-1,'=',6]
+	r2 = [2,3,-1,4,'<=',12]
+	r3 = [1,0,1,1,'<=',4]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-2,-1,-5,3]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
+def degenerationExample():
+	print 'Exemplo de degeneracao'
+	r1 =[1,0,'<=',3]
+	r2 = [0,1,'<=',4]
+	r3 = [4,3,'<=',12]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-5,-2]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
+def solucaoIlimitada():
+	print 'Solucao Ilimitada'
+	r1 =[4,1,'>=',20]
+	r2 = [1,2,'>=',10]
+	r3 = [1,0,'>=',2]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	r.append(r3)
+
+	f = [-1,-2]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
+def input1():
+	print ''
+	r1 =[1,1,'>=',2]
+	r2 = [1,2,'>=',5]
+	# r3 = [5,3,'<=',15]
+
+	r = list()
+	r.append(r1)
+	r.append(r2)
+	# r.append(r3)
+
+	f = [-1,-1]
+
+	tableau = Tableau(f,r)
+
+	simplex = Simplex(tableau)
+
+	simplex.execute()
+
+	print 'Solution: '+str(simplex.solution)
+	print simplex.tableau
+
 if __name__ == '__main__':
 
 	print 'Simplex Method'
@@ -352,8 +490,11 @@ if __name__ == '__main__':
 
 	# test3()
 
-	test4()
+	# test4()
 
+	# degenerationExample()
+
+	input1()
 
 
 
